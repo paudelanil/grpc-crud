@@ -1,0 +1,189 @@
+syntax="proto3";
+
+
+package grpc_crud;
+
+option go_package = "grpc_crud/pb";
+
+// Service for managing customer profile.
+service AccountService{
+   // Creates a new user account.
+   rpc CreateUser(CreateCustomerRequest) returns (CreateCustomerResponse) {}
+
+   // Retrieves user account details by user ID.
+   rpc GetUser(GetCustomerRequest) returns (GetCustomerResponse) {}
+
+   // Updates an existing user account.
+   rpc UpdateUser(UpdateCustomerRequest) returns (UpdateCustomerResponse) {}
+
+     // Deletes a user account by user ID.
+   rpc DeleteUser(DeleteCustomerRequest) returns (DeleteCustomerResponse) {}
+
+   //list all users
+   rpc ListUsers (ListCustomerRequest) returns (ListCustomerResponse) {}
+   
+     // create a new account for customer
+    rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse);
+
+    // retrieve account details
+    rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
+
+
+    // update account details
+    rpc UpdateAccount (UpdateAccountRequest) returns (UpdateAccountResponse);
+
+    // delete account
+    rpc DeleteAccount (DeleteAccountRequest) returns (DeleteAccountResponse);
+    
+    // list all accounts
+    rpc ListAccounts (ListAccountRequest) returns (ListAccountResponse);
+    
+
+}
+
+// Service for managing account statements
+
+
+// ============================================
+// CustomerService Message Definitions
+// ============================================
+
+// Request message for creating a new customer.
+message CreateCustomerRequest {
+    string first_name = 1;
+    string last_name = 2;
+    string email = 3;
+    string phone_number = 4;
+    string address = 5;
+}
+
+// Response message for creating a new customer.
+message CreateCustomerResponse {
+    string customer_id = 1;
+    string message = 2;
+}
+
+// Request message for retrieving customer details.
+message GetCustomerRequest {
+    string customer_id = 1;
+}
+
+// Response message for retrieving customer details.
+message GetCustomerResponse {
+    string customer_id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string email = 4;
+    string phone_number = 5;
+    string address = 6;
+    string created_at = 7;
+    string updated_at = 8;
+}
+
+// Request message for updating customer information.
+message UpdateCustomerRequest {
+    string customer_id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string email = 4;
+    string phone_number = 5;
+    string address = 6;
+}
+
+// Response message for updating customer information.
+message UpdateCustomerResponse {
+    string message = 1;
+    GetCustomerResponse customer = 2;
+}
+
+// Request message for deleting a customer.
+message DeleteCustomerRequest {
+    string customer_id = 1;
+}
+
+// Response message for deleting a customer.
+message DeleteCustomerResponse {
+    string message = 1;
+}
+
+//Response message for listing customers.
+message ListCustomerRequest {
+    int32 page_number = 1;
+    int32 page_size = 2;
+}
+
+message ListCustomerResponse {
+    repeated GetCustomerResponse customers = 1;
+    int32 total_count = 2;
+}
+
+
+// ============================================
+// AccountBankService Message Definitions
+// ============================================
+
+// Request message for creating a new bank account.
+message CreateAccountRequest {
+    string customer_id = 1;
+    string account_type = 2; // e.g., "savings", "checking"
+    string currency = 4; // e.g., "USD", "EUR"
+}
+
+// Response message for creating a new bank account.
+message CreateAccountResponse {
+    string account_id = 1;
+    string account_number = 2;
+    string message = 3;
+}
+
+// Request message for retrieving account details.
+message GetAccountRequest {
+    string account_id = 1;
+}
+
+// Response message for retrieving account details.
+message GetAccountResponse {
+    string account_id = 1;
+    string account_number = 2;
+    string customer_id = 3;
+    string account_type = 4;
+    double balance = 5;
+    string currency = 6;
+    string status = 7; // e.g., "active", "suspended", "closed"
+    string created_at = 8;
+    string updated_at = 9;
+}
+
+// Request message for updating account details.
+message UpdateAccountRequest {
+    string account_id = 1;
+    string account_type = 2;
+    string status = 3;
+}
+
+// Response message for updating account details.
+message UpdateAccountResponse {
+    string message = 1;
+    GetAccountResponse account = 2;
+}
+
+// Request message for deleting an account.
+message DeleteAccountRequest {
+    string account_id = 1;
+}
+
+// Response message for deleting an account.
+message DeleteAccountResponse {
+    string message = 1;
+}
+
+
+message ListAccountRequest {
+    int32 page_number = 1;
+    int32 page_size = 2;
+}
+message ListAccountResponse {
+    repeated GetAccountResponse accounts = 1;
+    int32 total_count = 2;
+}
+
