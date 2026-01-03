@@ -44,3 +44,19 @@ type Account struct {
 func (Account) TableName() string {
 	return "accounts"
 }
+
+// User represents the authentication user
+type User struct {
+	ID        string `gorm:"primaryKey;column:user_id"`
+	Username  string `gorm:"uniqueIndex;not null"`
+	Password  string `gorm:"not null"` // hashed password
+	Email     string `gorm:"uniqueIndex;not null"`
+	IsActive  bool   `gorm:"default:true"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
+func (User) TableName() string {
+	return "users"
+}

@@ -46,6 +46,32 @@ func (h *AuthHandler) Login(ctx context.Context, req *pb.UserLoginRequest) (*pb.
 	return response, nil
 }
 
+// Register handles user registration requests
+func (h *AuthHandler) Register(ctx context.Context, req *pb.UserRegisterRequest) (*pb.UserRegisterResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "request cannot be nil")
+	}
+
+	if req.Username == "" {
+		return nil, status.Error(codes.InvalidArgument, "username is required")
+	}
+
+	if req.Password == "" {
+		return nil, status.Error(codes.InvalidArgument, "password is required")
+	}
+
+	if req.Email == "" {
+		return nil, status.Error(codes.InvalidArgument, "email is required")
+	}
+
+	// Call service layer
+	err := h.authService.Register(ctx, req.Username, req.Email, req.Password)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &pb.UserRegisterResponse{Message: "User Registered Successfully"}, nil
+}
+
 // Logout handles user logout requests
 func (h *AuthHandler) Logout(ctx context.Context, req *pb.UserLogoutRequest) (*pb.UserLogoutResponse, error) {
 	if req == nil {

@@ -5,9 +5,11 @@ import (
 	"log"
 	"net"
 
+	"github.com/paudelanil/grpc-crud/internal/handler"
+	"github.com/paudelanil/grpc-crud/internal/repository"
+	"github.com/paudelanil/grpc-crud/internal/service"
 	"github.com/paudelanil/grpc-crud/models"
 	pb "github.com/paudelanil/grpc-crud/pb"
-	"github.com/paudelanil/grpc-crud/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"gorm.io/driver/postgres"
@@ -27,9 +29,24 @@ func main() {
 	}
 
 	// Auto Migrate all tables at once
-	if err := db.AutoMigrate(&models.Customer{}, &models.Account{}); err != nil {
+	if err := db.AutoMigrate(&models.Customer{}, &models.Account{}, &models.User{}); err != nil {
 		log.Fatalf("Failed to migrate: %v", err)
 	}
+
+	// Initialize Repositories
+	userRepo := repository.NewUserRepository(db)
+	customerRepo := repository.NewCustomerRepository(db)
+	accountRepo := repository.NewAccountRepository(db)
+
+	// Initialize Services
+	jwtSecret := "your-secret-key-change-this-in-production" // TODO: Move to environment variable
+	authService := service.NewAuthService(userRepo, jwtSecret)
+	customerService := service.NewCustomerService(customerRepo)
+	accountService := service.NewAccountService(accountRepo, customerRepo)
+
+	// Initialize Handlers
+	accountHandler := handler.NewAccountHandler(customerService, accountService)
+	authHandler := handler.NewAuthHandler(authService)
 
 	// start gRPC server
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", "localhost", "8090"))
@@ -39,9 +56,9 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	accountService := &service.AccountService{DB: db}
-
-	pb.RegisterAccountServiceServer(grpcServer, accountService)
+	// Register gRPC services
+	pb.RegisterAccountServiceServer(grpcServer, accountHandler)
+	pb.RegisterLoginServiceServer(grpcServer, authHandler)
 
 	reflection.Register(grpcServer)
 	log.Println("gRPC server listening on port", "8090")
