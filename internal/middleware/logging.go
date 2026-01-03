@@ -31,10 +31,10 @@ func LoggingInterceptor() grpc.UnaryServerInterceptor {
 		// Log the response
 		if err != nil {
 			st, _ := status.FromError(err)
-			log.Printf("[gRPC] <-- Method: %s | Duration: %v | Status: %s | Error: %v",
+			log.Printf("Method: %s | Duration: %v | Status: %s | Error: %v",
 				info.FullMethod, duration, st.Code(), err)
 		} else {
-			log.Printf("[gRPC] <-- Method: %s | Duration: %v | Status: OK",
+			log.Printf(" Method: %s | Duration: %v | Status: OK",
 				info.FullMethod, duration)
 		}
 
