@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/paudelanil/grpc-crud/internal/handler"
+	"github.com/paudelanil/grpc-crud/internal/middleware"
 	"github.com/paudelanil/grpc-crud/internal/repository"
 	"github.com/paudelanil/grpc-crud/internal/service"
 	"github.com/paudelanil/grpc-crud/models"
@@ -54,7 +55,13 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
+	// Create gRPC server with interceptors
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			middleware.LoggingInterceptor(),        // First: log all requests
+			middleware.AuthInterceptor(authService), // Second: validate authentication
+		),
+	)
 
 	// Register gRPC services
 	pb.RegisterAccountServiceServer(grpcServer, accountHandler)
