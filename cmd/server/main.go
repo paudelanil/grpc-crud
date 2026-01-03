@@ -30,7 +30,7 @@ func main() {
 	}
 
 	// Auto Migrate all tables at once
-	if err := db.AutoMigrate(&models.Customer{}, &models.Account{}, &models.User{}); err != nil {
+	if err := db.AutoMigrate(&models.Customer{}, &models.Account{}, &models.User{}, &models.Journal{}, &models.JournalEntry{}); err != nil {
 		log.Fatalf("Failed to migrate: %v", err)
 	}
 
@@ -38,16 +38,19 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	customerRepo := repository.NewCustomerRepository(db)
 	accountRepo := repository.NewAccountRepository(db)
+	transactionRepo := repository.NewTransactionRepository(db)
 
 	// Initialize Services
 	jwtSecret := "your-secret-key-change-this-in-production" // TODO: Move to environment variable
 	authService := service.NewAuthService(userRepo, jwtSecret)
 	customerService := service.NewCustomerService(customerRepo)
 	accountService := service.NewAccountService(accountRepo, customerRepo)
+	transactionService := service.NewTransactionService(transactionRepo, accountRepo)
 
 	// Initialize Handlers
 	accountHandler := handler.NewAccountHandler(customerService, accountService)
 	authHandler := handler.NewAuthHandler(authService)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	// start gRPC server
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", "localhost", "8090"))
@@ -66,6 +69,7 @@ func main() {
 	// Register gRPC services
 	pb.RegisterAccountServiceServer(grpcServer, accountHandler)
 	pb.RegisterLoginServiceServer(grpcServer, authHandler)
+	pb.RegisterTransactionServiceServer(grpcServer,transactionHandler)
 
 	reflection.Register(grpcServer)
 	log.Println("gRPC server listening on port", "8090")

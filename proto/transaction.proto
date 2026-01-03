@@ -1,0 +1,75 @@
+syntax="proto3";
+
+package grpc_crud;
+
+option go_package = "grpc_crud/pb";
+
+
+// Service for managing transactions.
+service TransactionService {
+    // Creates a new transaction.
+    rpc Deposit(TransactionRequest) returns (TransactinoResponse) ;
+
+    // Withdraws an amount from an account.
+    rpc Withdraw(TransactionRequest) returns (TransactinoResponse);
+
+    //Transfers money between two accounts.
+    rpc TransferMoney(TransferMoneyRequest) returns (TransferMoneyResponse);
+
+
+    // rpc GenerateStatement(GenerateStatementRequest) returns (GenerateStatementResponse);
+
+
+    // rpc GetStatement(GetStatementRequest) returns (GetStatementResponse);
+
+
+    // rpc ListStatements(ListStatementsRequest) returns (ListStatementsResponse);
+
+}
+
+// ============================================
+
+message DepositRequest {
+    string account_id = 1;
+    double amount = 2;
+    string narration = 3;
+    string reference_id = 4;
+  
+}
+
+message DepositResponse {
+    string journal_id = 1;
+    string message = 2;
+    double new_balance = 3;
+}
+
+message TransactionRequest {
+    string account_id = 1;
+    double amount = 2;
+    string narration = 3;
+    string reference_id = 4;
+}
+
+
+message TransactinoResponse {
+    string journal_id = 1;
+    string message = 2;
+    double new_balance = 3;
+}
+
+
+message TransferMoneyRequest {
+    string from_account_id = 1;
+    string to_account_id = 2;
+    double amount = 3;
+    string narration = 4;
+    string reference_id = 5;
+}
+
+message TransferMoneyResponse {
+    string journal_id = 1;
+    string message = 2;
+    double from_account_balance = 3;
+    double to_account_balance = 4;
+}
+

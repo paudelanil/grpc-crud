@@ -17,6 +17,7 @@ type IAccountRepository interface {
 	Update(ctx context.Context, account *models.Account) error
 	Delete(ctx context.Context, id string) error
 	IsAccountNumberTaken(ctx context.Context, accountNumber string) (bool, error)
+	UpdateBalance(ctx context.Context, accountID string, newBalance float64) error
 }
 
 // AccountRepository implements IAccountRepository interface
@@ -94,4 +95,15 @@ func (r *AccountRepository) IsAccountNumberTaken(ctx context.Context, accountNum
 		return false, result.Error
 	}
 	return count > 0, nil
+}
+
+
+//UpdateBalance updates the balance and update time for given accountID
+
+func (r *AccountRepository) UpdateBalance(ctx context.Context, accountID string, newBalance float64) error {
+	result := r.db.WithContext(ctx).Model(&models.Account{}).Where("account_id = ?", accountID).Updates(map[string]interface{}{
+		"balance":     newBalance,
+		"updated_at":  gorm.Expr("NOW()"),
+	})
+	return result.Error
 }
