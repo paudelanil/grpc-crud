@@ -18,6 +18,7 @@ type IAccountRepository interface {
 	Delete(ctx context.Context, id string) error
 	IsAccountNumberTaken(ctx context.Context, accountNumber string) (bool, error)
 	UpdateBalance(ctx context.Context, accountID string, newBalance float64) error
+	GetBalanceByID(ctx context.Context, id string) (float64, error)
 }
 
 // AccountRepository implements IAccountRepository interface
@@ -106,4 +107,17 @@ func (r *AccountRepository) UpdateBalance(ctx context.Context, accountID string,
 		"updated_at":  gorm.Expr("NOW()"),
 	})
 	return result.Error
+}
+
+// GetBalanceByID retrieves the balance of an account by ID
+func (r *AccountRepository) GetBalanceByID(ctx context.Context, id string) (float64, error) {
+	var account models.Account
+	result := r.db.WithContext(ctx).Select("balance").Where("account_id = ?", id).First(&account)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return 0, errors.New("account not found")
+		}
+		return 0, result.Error
+	}
+	return account.Balance, nil
 }

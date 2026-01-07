@@ -30,7 +30,7 @@ func main() {
 	}
 
 	// Auto Migrate all tables at once
-	if err := db.AutoMigrate(&models.Customer{}, &models.Account{}, &models.User{}, &models.Journal{}, &models.JournalEntry{}); err != nil {
+	if err := db.AutoMigrate(&models.Customer{}, &models.Account{}, &models.User{}, &models.Journal{}, &models.JournalEntry{}, &models.Statement{}); err != nil {
 		log.Fatalf("Failed to migrate: %v", err)
 	}
 

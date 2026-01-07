@@ -19,9 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TransactionService_Deposit_FullMethodName       = "/grpc_crud.TransactionService/Deposit"
-	TransactionService_Withdraw_FullMethodName      = "/grpc_crud.TransactionService/Withdraw"
-	TransactionService_TransferMoney_FullMethodName = "/grpc_crud.TransactionService/TransferMoney"
+	TransactionService_Deposit_FullMethodName           = "/grpc_crud.TransactionService/Deposit"
+	TransactionService_WithDraw_FullMethodName          = "/grpc_crud.TransactionService/WithDraw"
+	TransactionService_TransferMoney_FullMethodName     = "/grpc_crud.TransactionService/TransferMoney"
+	TransactionService_GenerateStatement_FullMethodName = "/grpc_crud.TransactionService/GenerateStatement"
+	TransactionService_GetStatement_FullMethodName      = "/grpc_crud.TransactionService/GetStatement"
+	TransactionService_ListStatements_FullMethodName    = "/grpc_crud.TransactionService/ListStatements"
 )
 
 // TransactionServiceClient is the client API for TransactionService service.
@@ -29,11 +32,17 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TransactionServiceClient interface {
 	// Creates a new transaction.
-	Deposit(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactinoResponse, error)
+	Deposit(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	// Withdraws an amount from an account.
-	Withdraw(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactinoResponse, error)
+	WithDraw(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactionResponse, error)
 	// Transfers money between two accounts.
 	TransferMoney(ctx context.Context, in *TransferMoneyRequest, opts ...grpc.CallOption) (*TransferMoneyResponse, error)
+	// Generates a statement for an account within a date range.
+	GenerateStatement(ctx context.Context, in *GenerateStatementRequest, opts ...grpc.CallOption) (*GenerateStatementResponse, error)
+	// Retrieves a specific statement by its ID.
+	GetStatement(ctx context.Context, in *GetStatementRequest, opts ...grpc.CallOption) (*GetStatementResponse, error)
+	// Lists all statements for an account with pagination.
+	ListStatements(ctx context.Context, in *ListStatementsRequest, opts ...grpc.CallOption) (*ListStatementsResponse, error)
 }
 
 type transactionServiceClient struct {
@@ -44,8 +53,8 @@ func NewTransactionServiceClient(cc grpc.ClientConnInterface) TransactionService
 	return &transactionServiceClient{cc}
 }
 
-func (c *transactionServiceClient) Deposit(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactinoResponse, error) {
-	out := new(TransactinoResponse)
+func (c *transactionServiceClient) Deposit(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+	out := new(TransactionResponse)
 	err := c.cc.Invoke(ctx, TransactionService_Deposit_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -53,9 +62,9 @@ func (c *transactionServiceClient) Deposit(ctx context.Context, in *TransactionR
 	return out, nil
 }
 
-func (c *transactionServiceClient) Withdraw(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactinoResponse, error) {
-	out := new(TransactinoResponse)
-	err := c.cc.Invoke(ctx, TransactionService_Withdraw_FullMethodName, in, out, opts...)
+func (c *transactionServiceClient) WithDraw(ctx context.Context, in *TransactionRequest, opts ...grpc.CallOption) (*TransactionResponse, error) {
+	out := new(TransactionResponse)
+	err := c.cc.Invoke(ctx, TransactionService_WithDraw_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -71,16 +80,49 @@ func (c *transactionServiceClient) TransferMoney(ctx context.Context, in *Transf
 	return out, nil
 }
 
+func (c *transactionServiceClient) GenerateStatement(ctx context.Context, in *GenerateStatementRequest, opts ...grpc.CallOption) (*GenerateStatementResponse, error) {
+	out := new(GenerateStatementResponse)
+	err := c.cc.Invoke(ctx, TransactionService_GenerateStatement_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transactionServiceClient) GetStatement(ctx context.Context, in *GetStatementRequest, opts ...grpc.CallOption) (*GetStatementResponse, error) {
+	out := new(GetStatementResponse)
+	err := c.cc.Invoke(ctx, TransactionService_GetStatement_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transactionServiceClient) ListStatements(ctx context.Context, in *ListStatementsRequest, opts ...grpc.CallOption) (*ListStatementsResponse, error) {
+	out := new(ListStatementsResponse)
+	err := c.cc.Invoke(ctx, TransactionService_ListStatements_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TransactionServiceServer is the server API for TransactionService service.
 // All implementations must embed UnimplementedTransactionServiceServer
 // for forward compatibility
 type TransactionServiceServer interface {
 	// Creates a new transaction.
-	Deposit(context.Context, *TransactionRequest) (*TransactinoResponse, error)
+	Deposit(context.Context, *TransactionRequest) (*TransactionResponse, error)
 	// Withdraws an amount from an account.
-	Withdraw(context.Context, *TransactionRequest) (*TransactinoResponse, error)
+	WithDraw(context.Context, *TransactionRequest) (*TransactionResponse, error)
 	// Transfers money between two accounts.
 	TransferMoney(context.Context, *TransferMoneyRequest) (*TransferMoneyResponse, error)
+	// Generates a statement for an account within a date range.
+	GenerateStatement(context.Context, *GenerateStatementRequest) (*GenerateStatementResponse, error)
+	// Retrieves a specific statement by its ID.
+	GetStatement(context.Context, *GetStatementRequest) (*GetStatementResponse, error)
+	// Lists all statements for an account with pagination.
+	ListStatements(context.Context, *ListStatementsRequest) (*ListStatementsResponse, error)
 	mustEmbedUnimplementedTransactionServiceServer()
 }
 
@@ -88,14 +130,23 @@ type TransactionServiceServer interface {
 type UnimplementedTransactionServiceServer struct {
 }
 
-func (UnimplementedTransactionServiceServer) Deposit(context.Context, *TransactionRequest) (*TransactinoResponse, error) {
+func (UnimplementedTransactionServiceServer) Deposit(context.Context, *TransactionRequest) (*TransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deposit not implemented")
 }
-func (UnimplementedTransactionServiceServer) Withdraw(context.Context, *TransactionRequest) (*TransactinoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Withdraw not implemented")
+func (UnimplementedTransactionServiceServer) WithDraw(context.Context, *TransactionRequest) (*TransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method WithDraw not implemented")
 }
 func (UnimplementedTransactionServiceServer) TransferMoney(context.Context, *TransferMoneyRequest) (*TransferMoneyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TransferMoney not implemented")
+}
+func (UnimplementedTransactionServiceServer) GenerateStatement(context.Context, *GenerateStatementRequest) (*GenerateStatementResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateStatement not implemented")
+}
+func (UnimplementedTransactionServiceServer) GetStatement(context.Context, *GetStatementRequest) (*GetStatementResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStatement not implemented")
+}
+func (UnimplementedTransactionServiceServer) ListStatements(context.Context, *ListStatementsRequest) (*ListStatementsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListStatements not implemented")
 }
 func (UnimplementedTransactionServiceServer) mustEmbedUnimplementedTransactionServiceServer() {}
 
@@ -128,20 +179,20 @@ func _TransactionService_Deposit_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TransactionService_Withdraw_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _TransactionService_WithDraw_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TransactionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TransactionServiceServer).Withdraw(ctx, in)
+		return srv.(TransactionServiceServer).WithDraw(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TransactionService_Withdraw_FullMethodName,
+		FullMethod: TransactionService_WithDraw_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactionServiceServer).Withdraw(ctx, req.(*TransactionRequest))
+		return srv.(TransactionServiceServer).WithDraw(ctx, req.(*TransactionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -164,6 +215,60 @@ func _TransactionService_TransferMoney_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TransactionService_GenerateStatement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateStatementRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).GenerateStatement(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TransactionService_GenerateStatement_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).GenerateStatement(ctx, req.(*GenerateStatementRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TransactionService_GetStatement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStatementRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).GetStatement(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TransactionService_GetStatement_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).GetStatement(ctx, req.(*GetStatementRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TransactionService_ListStatements_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListStatementsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).ListStatements(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TransactionService_ListStatements_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).ListStatements(ctx, req.(*ListStatementsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TransactionService_ServiceDesc is the grpc.ServiceDesc for TransactionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -176,12 +281,24 @@ var TransactionService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TransactionService_Deposit_Handler,
 		},
 		{
-			MethodName: "Withdraw",
-			Handler:    _TransactionService_Withdraw_Handler,
+			MethodName: "WithDraw",
+			Handler:    _TransactionService_WithDraw_Handler,
 		},
 		{
 			MethodName: "TransferMoney",
 			Handler:    _TransactionService_TransferMoney_Handler,
+		},
+		{
+			MethodName: "GenerateStatement",
+			Handler:    _TransactionService_GenerateStatement_Handler,
+		},
+		{
+			MethodName: "GetStatement",
+			Handler:    _TransactionService_GetStatement_Handler,
+		},
+		{
+			MethodName: "ListStatements",
+			Handler:    _TransactionService_ListStatements_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

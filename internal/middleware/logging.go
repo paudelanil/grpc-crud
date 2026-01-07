@@ -20,7 +20,7 @@ func LoggingInterceptor() grpc.UnaryServerInterceptor {
 		start := time.Now()
 
 		// Log the incoming request
-		log.Printf("[gRPC] --> Method: %s | Started at: %s", info.FullMethod, start.Format(time.RFC3339))
+		log.Printf("%s | Started at: %s", info.FullMethod, start.Format(time.RFC3339))
 
 		// Call the handler to complete the RPC
 		resp, err := handler(ctx, req)
@@ -31,10 +31,10 @@ func LoggingInterceptor() grpc.UnaryServerInterceptor {
 		// Log the response
 		if err != nil {
 			st, _ := status.FromError(err)
-			log.Printf("Method: %s | Duration: %v | Status: %s | Error: %v",
+			log.Printf("s | Duration: %v | Status: %s | Error: %v",
 				info.FullMethod, duration, st.Code(), err)
 		} else {
-			log.Printf(" Method: %s | Duration: %v | Status: OK",
+			log.Printf("%s | Duration: %v | Status: OK",
 				info.FullMethod, duration)
 		}
 

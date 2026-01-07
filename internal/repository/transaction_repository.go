@@ -2,7 +2,8 @@ package repository
 
 import (
 	"context"
-	
+	"errors"
+
 	"github.com/paudelanil/grpc-crud/models"
 	"gorm.io/gorm"
 )
@@ -16,6 +17,11 @@ type ITransactionRepository interface {
 	GetJournalByRefID(ctx context.Context, id string) (*models.Journal, error)
 	IsJournalExists(ctx context.Context, refID string) (bool, error)
 	BeginTransaction(ctx context.Context) (*gorm.DB, error)
+
+	CreateStatement(ctx context.Context, statement *models.Statement) error
+	GetJournalEntriesBeforePeriod(ctx context.Context, accountID string, startDate string) ([]models.JournalEntry, error)
+	GetJournalEntriesBetweenPeriod(ctx context.Context, accountID string, startDate, endDate string) ([]models.JournalEntry, error)
+
 }
 
 // TransactionRepository implements ITransactionRepository interface
@@ -65,4 +71,34 @@ func (r *TransactionRepository) BeginTransaction(ctx context.Context) (*gorm.DB,
 	return tx, tx.Error
 }
 
+func (r *TransactionRepository) GetJournalEntriesBeforePeriod(ctx context.Context, accountID string, startDate string) ([]models.JournalEntry, error) {
+	var entries []models.JournalEntry
+	
+	if err := r.db.WithContext((ctx)).Joins("JOIN journals ON journal_entries.journal_id = journals.journal_id").
+		Where("journal_entries.account_id = ? AND journals.value_date < ?", accountID, startDate).
+		Find(&entries).Error; err != nil {
+		return nil, errors.New("failed to fetch opening balance:"+ err.Error())
+	}
+	
 
+	return entries, nil
+}
+	
+
+func (r *TransactionRepository) GetJournalEntriesBetweenPeriod(ctx context.Context, accountID string, startDate, endDate string) ([]models.JournalEntry, error) {
+	var entries []models.JournalEntry
+	
+	if err := r.db.WithContext((ctx)).Joins("JOIN journals ON journal_entries.journal_id = journals.journal_id").
+		Where("journal_entries.account_id = ? AND journals.value_date BETWEEN ? AND ?", accountID, startDate, endDate).
+		Find(&entries).Error; err != nil {
+		return nil, errors.New("failed to fetch journal entries:"+ err.Error())
+	}
+	
+
+	return entries, nil
+}
+
+func (r *TransactionRepository) CreateStatement(ctx context.Context, statement *models.Statement) error {
+	result := r.db.WithContext(ctx).Create(statement)
+	return result.Error
+}

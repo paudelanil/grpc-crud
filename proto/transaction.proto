@@ -8,22 +8,22 @@ option go_package = "grpc_crud/pb";
 // Service for managing transactions.
 service TransactionService {
     // Creates a new transaction.
-    rpc Deposit(TransactionRequest) returns (TransactinoResponse) ;
+    rpc Deposit(TransactionRequest) returns (TransactionResponse) ;
 
     // Withdraws an amount from an account.
-    rpc Withdraw(TransactionRequest) returns (TransactinoResponse);
+    rpc WithDraw(TransactionRequest) returns (TransactionResponse);
 
     //Transfers money between two accounts.
     rpc TransferMoney(TransferMoneyRequest) returns (TransferMoneyResponse);
 
+    // Generates a statement for an account within a date range.
+    rpc GenerateStatement(GenerateStatementRequest) returns (GenerateStatementResponse);
 
-    // rpc GenerateStatement(GenerateStatementRequest) returns (GenerateStatementResponse);
+    // Retrieves a specific statement by its ID.
+    rpc GetStatement(GetStatementRequest) returns (GetStatementResponse);
 
-
-    // rpc GetStatement(GetStatementRequest) returns (GetStatementResponse);
-
-
-    // rpc ListStatements(ListStatementsRequest) returns (ListStatementsResponse);
+    // Lists all statements for an account with pagination.
+    rpc ListStatements(ListStatementsRequest) returns (ListStatementsResponse);
 
 }
 
@@ -51,7 +51,7 @@ message TransactionRequest {
 }
 
 
-message TransactinoResponse {
+message TransactionResponse {
     string journal_id = 1;
     string message = 2;
     double new_balance = 3;
@@ -71,5 +71,56 @@ message TransferMoneyResponse {
     string message = 2;
     double from_account_balance = 3;
     double to_account_balance = 4;
+}
+
+message GenerateStatementRequest {
+    string account_id = 1;
+    string start_date = 2;
+    string end_date = 3;
+}
+
+message GenerateStatementResponse {
+    string statement_id = 1;
+    string account_id = 2;
+    string start_date = 3;
+    string end_date = 4;
+    string opening_balance = 5;
+    string closing_balance = 6;
+    repeated  StatementTransaction transactions= 7;
+    string generated_at = 8;
+    
+}
+
+message GetStatementRequest {
+    string statement_id = 1;
+  
+}
+
+message GetStatementResponse {
+    string statement_id = 1;
+    string account_id = 2;
+    string start_date = 3;
+    string end_date = 4;
+    repeated StatementTransaction transactions = 5;
+}
+
+message ListStatementsRequest {
+    string account_id = 1;
+    int32 page_number = 2;
+    int32 page_size = 3;
+}
+
+message ListStatementsResponse {
+    repeated GetStatementResponse statements = 1;
+    int32 total_statements = 2;
+}
+
+message StatementTransaction {
+    string transaction_id = 1;
+    string date = 2;
+    string description = 3;
+    string entry_type = 4; // DEBIT or CREDIT
+    double amount = 5;
+    double balance = 6; // Running balance after this transaction
 }
 
